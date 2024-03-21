@@ -1,12 +1,11 @@
-
 module alu(
-  output reg [31:0] ans,
-  output reg zero,
-  input [31:0] a,
-  input [31:0] b,
+  	output reg [31:0] ans,
+  	output reg zero,
+  	input [31:0] a,
+  	input [31:0] b,
 	input[1:0] aluOP,
-  input [5:0] sel);
-  reg[32:0] temp;
+  	input [5:0] sel);
+  	reg[32:0] temp;
 
   always@(*)
     begin

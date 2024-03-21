@@ -1,27 +1,43 @@
-module control_unit(opcode, regDest, jump, branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite, ALUOp);
-input [5:0] opcode;
-output reg regDest, jump, branch, MemRead, MemtoReg, MemWrite, ALUSrc, RegWrite;
-output reg [1:0] ALUOp;
+module control_sig(
+	output reg regDest,
+	output reg jump,
+	output reg branch,
+	output reg MemRead,
+	output reg MemtoReg,
+	output reg MemWrite,
+	output reg ALUSrc,
+	output reg RegWrite,
+	output reg [1:0] ALUOp,
+	input [5:0]opcode
+);
+always@(opcode)
+begin
+	case(opcode)
+	//rtype
+	6'b0:begin
+		regDest = 1; RegWrite = 1; ALUOp = 2'b10; jump=0; branch=0;
+		MemRead = 0; MemtoReg = 0; MemWrite = 0;ALUSrc = 0;
+	end
+	//lw 35
+	6'b100011:begin
+		regDest = 0; RegWrite = 1; ALUOp = 2'b00; jump=0; branch=0;
+		MemRead = 1; MemtoReg =1 ; MemWrite = 0;ALUSrc = 1;
+	end
+	//sw 43
+	6'b101011:begin		
+		regDest = 0; RegWrite = 0; ALUOp = 2'b00; jump=0; branch=0;
+		MemRead = 0; MemtoReg = 0; MemWrite = 1;ALUSrc = 1;
+	end
+	6'b000100:begin
+		regDest = 0; RegWrite = 0; ALUOp = 2'b01; jump=0; branch=1;
+		MemRead = 0; MemtoReg = 0; MemWrite = 1;ALUSrc = 0;
+	end
+default: begin
+		regDest = 0; RegWrite = 0; ALUOp = 2'b01; jump=0; branch=1;
+		MemRead = 0; MemtoReg = 0; MemWrite = 0;ALUSrc = 0;
+	end
 
-always@(opcode) begin
-	if(opcode == 00)begin // Load
-	 	regDest = 0; ALUSrc = 1; MemtoReg = 1;
-	 	RegWrite = 1; MemRead = 1; MemWrite = 0;
-	 	branch = 0; jump = 0; ALUOp = 2'b00;
-	end
-	else if(opcode == 01) begin
-	 	regDest = 0; ALUSrc = 1; MemtoReg = 0;
-	 	RegWrite = 0; MemRead = 0; MemWrite = 1;
-	 	branch = 0; jump = 0; ALUOp = 2'b10;
-	end
-	else if(opcode == 10) begin
-	 	regDest = 1; ALUSrc = 0; MemtoReg = 0;
-	 	RegWrite = 1; MemRead = 0; MemWrite = 0;
-	 	branch = 0; jump = 0; ALUOp = 2'b10;
-	end
-	
-	
-	
+	endcase
 end
 
 endmodule

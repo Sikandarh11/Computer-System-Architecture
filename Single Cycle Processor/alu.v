@@ -20,10 +20,18 @@ module alu(
 		        6'b100010: temp = a-b;
 		        6'b100100: temp = a&b;
 		        6'b100101: temp = a|b;
+			6'b101010: if(a<b) temp = 1; else temp=0;
 		        default: temp = 0;
 		      endcase 
-		end
+		      end
+		
+		2'b11:temp = a+b;    //temp = a|b; //for slti
+		//case(sel) 6'b000011:if(a<b) temp = 1; else temp=0;//for slti
+		//default: 
+			//temp = a+b; //lw, sw
+		//endcase
 	endcase
-      ans = temp[31:0];
+//if(temp%2 == 1) temp = 0;
+     ans = temp[31:0];
     end 
 endmodule

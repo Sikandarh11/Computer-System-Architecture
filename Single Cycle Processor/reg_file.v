@@ -49,8 +49,9 @@ assign rdata1 = memory[rs1];
 assign rdata2 = memory[rs2];
 
 always @(posedge clk) begin
-if(mem_write)
-memory[rd] = write_data;
+	if(write_data != 0) begin
+		if(mem_write)
+		memory[rd] = write_data;
+	end
 end
-
 endmodule

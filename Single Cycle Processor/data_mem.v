@@ -9,6 +9,12 @@ memory[2] = 32'd3;
 memory[3] = 32'd4;
 memory[4] = 32'd5;
 memory[5] = 32'd6;
+memory[6] = 32'd1;
+memory[7] = 32'd2;
+memory[8] = 32'd3;
+memory[9] = 32'd4;
+memory[10] = 32'd5;
+memory[11] = 32'd6;
 end
 
 always @(posedge clk) 
@@ -18,4 +24,5 @@ memory[address] = data_in;
 always @(address) 
 data_out = memory[address];
 endmodule
+
 

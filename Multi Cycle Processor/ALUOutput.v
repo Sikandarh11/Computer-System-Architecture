@@ -1,7 +1,7 @@
-module ALUOutput (
-    input wire clk,
-    input wire reset,
-    input wire [31:0] ALU_result,
+module ALUOutputMC (
+    input clk,
+    input reset,
+    input [31:0] ALU_result,
     output reg [31:0] ALUout
 );
 
@@ -14,4 +14,3 @@ always @(posedge clk or posedge reset) begin
 end
 
 endmodule
-

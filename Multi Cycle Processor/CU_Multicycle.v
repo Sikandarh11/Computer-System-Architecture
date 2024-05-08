@@ -8,7 +8,7 @@ module CU_Multicycle (
 	output reg MemRead,
 	output reg MemtoReg,
 	output reg IRWrite,
-	output reg PCSource,
+	output reg [1:0]PCSource,
 	output reg RegDst,
 	output reg RegWrite,
 	output reg ALUSrcA,
@@ -59,16 +59,16 @@ module CU_Multicycle (
       		case (cs)
 	        	FETCH:  ns = DECODE;
 		        DECODE:  case(opcode)
-	                	6'd0:	ns = MEM_ADR;//lw
-	                	6'd1:	ns = MEM_ADR;//sw
-	                	6'd2:	ns = EXECUTION;//r
-	                	6'd3:	ns = BRANCH;//beq
-				6'd4:	ns = JUMP;//beq
-				default: ns = FETCH;
+	                	6'b100011:	ns = MEM_ADR;//lw
+	                	6'b101011:	ns = MEM_ADR;//sw
+	                	6'b000000:	ns = EXECUTION;//r
+	                	6'b000100:	ns = BRANCH;//beq
+				6'b000010:	ns = JUMP;//jump
+				default:	ns = FETCH;
                  	endcase
 		        MEM_ADR:  case(opcode)
-                   		6'd0:      ns = MEM_READ;//lw
-                   		6'd1:      ns = MEM_WRITE;//sw
+                   		6'b100011:      ns = MEM_READ;//lw
+                   		6'b101011:      ns = MEM_WRITE;//sw
                    		default: ns = FETCH;
                  	endcase
 			EXECUTION:   ns = RTYPE;	
@@ -86,7 +86,7 @@ module CU_Multicycle (
 	always@(cs) begin
 	//making default everything zero to avoid repition(spelling??)
 		IorD=1'b0; MemRead=1'b0; MemWrite=1'b0; MemtoReg=1'b0; IRWrite=1'b0; 
-		PCSource=1'b0;	ALUSrcB=2'b00; ALUSrcA=1'b0; RegWrite=1'b0; 
+		PCSource=2'b00;	ALUSrcB=2'b00; ALUSrcA=1'b0; RegWrite=1'b0; 
 		RegDst=1'b0; PCWrite=1'b0; PCWriteCond=1'b0; ALUOp=2'b00;
 
     		case (cs)

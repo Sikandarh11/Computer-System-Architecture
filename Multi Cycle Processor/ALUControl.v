@@ -1,7 +1,6 @@
-module ALUControl(input [3:0] opcode, input [1:0] aluOP, output reg op);
+module ALUControlMC(input [3:0] opcode, input [1:0] aluOP, output reg [3:0] op);
 //opcode is coming from instruction
 //aluOP from control unit
-
 	always@(*)
 	begin
 		case(aluOP)
@@ -10,6 +9,5 @@ module ALUControl(input [3:0] opcode, input [1:0] aluOP, output reg op);
 			2'b10: op = opcode; //rtype
 		endcase		
 	end
-
 
 endmodule

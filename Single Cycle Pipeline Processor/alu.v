@@ -1,5 +1,6 @@
 
-module alu(
+
+module alu_pipeline(
   	output reg [31:0] ans,
   	output reg zero,
   	input [31:0] a,
@@ -10,6 +11,7 @@ module alu(
 
   always@(*)
     begin
+	zero=0;
 	case(aluOP)
 		2'b00: temp = a+b;
 		2'b01: begin temp = a-b; 
@@ -24,6 +26,7 @@ module alu(
 			6'b101010: if(a<b) temp = 1; else temp=0;
 		        default: temp = 0;
 		      endcase 
+			 zero=0;
 		      end
 		
 		2'b11:temp = a+b;    //temp = a|b; //for slti

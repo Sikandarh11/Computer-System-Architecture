@@ -21,7 +21,6 @@ module EX_MEM_pipeline_reg (
     input wire MemWrite,
     input wire RegWrite,
     
-    output reg regDest_out,
     output reg jump_out,
     output reg branch_out,
     output reg MemRead_out,
@@ -32,18 +31,18 @@ module EX_MEM_pipeline_reg (
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            alu_data_out1 <= 32'h0;
-            alu_data_out2 <= 32'h0;
-            rt_out <= 32'h0;
-            zero_out <= 1'b0;
-            reg_des_address_out <= 5'b0;
+            alu_data_out1 = 32'h0;
+            alu_data_out2 = 32'h0;
+            rt_out = 32'h0;
+            zero_out = 1'b0;
+            reg_des_address_out = 5'b0;
             
-            jump_out <= 1'b0;
-            branch_out <= 1'b0;
-            MemRead_out <= 1'b0;
-            MemtoReg_out <= 1'b0;
-            MemWrite_out <= 1'b0;
-            RegWrite_out <= 1'b0;
+            jump_out = 1'b0;
+            branch_out = 1'b0;
+            MemRead_out = 1'b0;
+            MemtoReg_out = 1'b0;
+            MemWrite_out = 1'b0;
+            RegWrite_out = 1'b0;
         end else begin
             alu_data_out1 <= alu_data1;
             alu_data_out2 <= alu_data2;

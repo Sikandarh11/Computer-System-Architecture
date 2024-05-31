@@ -6,14 +6,14 @@ module IF_ID_pipeline_reg (
 	
     output reg [31:0] alu_data_out,
     output reg [31:0] inst_mem_data_out
-);
+	);
 
     always @(posedge clk or posedge reset) begin
         if (reset) begin
-            alu_data_out <= 32'h0;
-            inst_mem_data_out <= 32'h0;
+            alu_data_out = 32'h0;
+            inst_mem_data_out = 32'h0;
         end else begin
-            alu_data_out <= alu_data;
+            alu_data_out <= alu_data+1;
             inst_mem_data_out <= inst_mem_data;
         end
     end

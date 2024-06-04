@@ -1,7 +1,7 @@
 module ID_EX_pipeline_reg (
     input wire clk,
     input wire reset,
-    
+    input stall,
     input wire [31:0] alu_data, 
     input wire [31:0] instruction, 
     input wire [31:0] rs,
@@ -60,7 +60,7 @@ module ID_EX_pipeline_reg (
             ALUOp_out = 2'b0;
             RegWrite_out = 1'b0;
 	    instruction_out = 0;
-        end else begin
+        end else if (!stall) begin
             alu_data_out = alu_data;
             rs_out = rs;
             rt_out = rt;

@@ -14,7 +14,7 @@ module datapath_pipeline();
     reg [31:0] tempPC, jumpPC;
     wire [31:0] data_out, data_out_WB;
     reg control;
-
+reg jumpNow;
     //==================>Control Signals for Registers<=========================
     // IO for 
  
@@ -54,7 +54,7 @@ module datapath_pipeline();
         .jump_address(jumpPC),
         .pc_out(pc_out),
 	.enable(~stall),
-        .jump(jump),
+        .jump(jumpNow),
         .clk(clk),
         .rst(rst)
     );
@@ -107,8 +107,8 @@ module datapath_pipeline();
         .clk(clk),
         .mem_write(RegWrite_WB)
     );
-reg branchAlways;
-reg [31:0] branch_address2;
+	reg branchAlways;
+	reg [31:0] branch_address2;
 	always@(posedge clk) begin 
 		if (branch == 1) begin
 			branch_address2[14:0] = instruction[15:0];
@@ -121,11 +121,17 @@ reg [31:0] branch_address2;
 			branchAlways=1'b1;
 		end else
 			branchAlways=1'b0;
+	if(instruction[31:26]==6'b000010)begin
+        	jumpPC = 0;
+	        jumpPC = instruction[25:0];
+	        jumpPC = jumpPC << 2;
+		jumpNow=1'b1;
+	end else jumpNow=1'b0;
 	end
     // SignExtend Call
     wire [31:0] SignExtend;
     sign_extend se(instruction_ID[15:0], SignExtend);
-
+	
     
 
     //=====================================>ID_EX_pipeline_reg call<====================================    
@@ -208,9 +214,6 @@ reg [31:0] branch_address2;
 	    2'b11: alu_inp_1 = data_out;
         endcase
 
-        jumpPC = 0;
-        jumpPC = instruction[25:0];
-        jumpPC = jumpPC << 2;
     end
 
     alu_pipeline calc(
@@ -289,6 +292,7 @@ reg [31:0] branch_address2;
         .rd_address_out(reg_des_address_WB),
         .data_out(data_out_WB),
 
+	    
         .RegWrite_out(RegWrite_WB),
         .MemtoReg_out(MemtoReg_WB)
     );
@@ -306,3 +310,4 @@ reg [31:0] branch_address2;
 
     always #50 clk = ~clk;
 endmodule
+s

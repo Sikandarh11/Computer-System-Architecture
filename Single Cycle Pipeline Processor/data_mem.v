@@ -9,6 +9,8 @@ memory[2] = 32'd3;
 memory[3] = 32'd4;
 memory[4] = 32'd5;
 memory[5] = 32'd6;
+
+memory[7] = 32'd7;
 end
 
 always @(posedge clk) 

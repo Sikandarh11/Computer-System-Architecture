@@ -292,7 +292,6 @@ reg jumpNow;
         .rd_address_out(reg_des_address_WB),
         .data_out(data_out_WB),
 
-	    
         .RegWrite_out(RegWrite_WB),
         .MemtoReg_out(MemtoReg_WB)
     );
@@ -310,4 +309,3 @@ reg jumpNow;
 
     always #50 clk = ~clk;
 endmodule
-s

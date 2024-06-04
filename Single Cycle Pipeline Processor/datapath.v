@@ -1,8 +1,13 @@
-module datapath_pipeline();
-    reg clk;
-    wire [31:0] pc, pc_out;
+module datapath_pipeline(
+	input clk,
+	input rst,
+	output [31:0] pc,
+	output stall,
+	output [1:0] forwardA,
+	output [1:0] forwardB
+);
+    wire [31:0] pc_out;
     wire [31:0] instruction, instruction_ID, instruction_EX;
-    reg rst;
     wire zero;
     wire [31:0] rs, rt, rd, ans, rd_final_data;
     // temp var
@@ -35,11 +40,23 @@ module datapath_pipeline();
     wire [4:0] reg_des_address_WB;
 
     //========================Before IF/ID Register====================================
+	wire [31:0] alu_data_out;
+// Hazard Detection Unit
+    hazard_detection_unit hdu(
+	.clk(clk),
+        .rs1_ID(instruction_ID[25:21]),
+        .rs2_ID(instruction_ID[20:16]),
+        .rt_EX(rt_address),
+        .MemRead_EX(MemRead_EX),
+        .stall(stall)
+    );
+
     // PC Call
     PC_pipeline uut (
         .pc(pc),
         .jump_address(jumpPC),
         .pc_out(pc_out),
+	.enable(~stall),
         .jump(jump),
         .clk(clk),
         .rst(rst)
@@ -52,14 +69,13 @@ module datapath_pipeline();
     );
 
     //=====================>IF/ID reg Call<======================
-    wire [31:0] alu_data_out;
-
+    
     IF_ID_pipeline_reg IF_ID_call(
         .clk(clk),
         .reset(rst),
-        .alu_data(pc+1), //=====================Ya PC +1 wali setting krlena noor ============================
+        .enable(~stall), // Enable the register only if there's no stall
+        .alu_data(pc + 1),
         .inst_mem_data(instruction),
-
         .alu_data_out(alu_data_out),
         .inst_mem_data_out(instruction_ID)
     );
@@ -99,20 +115,13 @@ module datapath_pipeline();
     wire [31:0] SignExtend;
     sign_extend se(instruction_ID[15:0], SignExtend);
 
-    // Hazard Detection Unit
-    wire stall;
-    hazard_detection_unit hdu(
-        .rs1_ID(instruction_ID[25:21]),
-        .rs2_ID(instruction_ID[20:16]),
-        .rt_EX(rt_address),
-        .MemRead_EX(MemRead_EX),
-        .stall(stall)
-    );
+    
 
     //=====================================>ID_EX_pipeline_reg call<====================================    
     ID_EX_pipeline_reg ID_EX_Call(
         .clk(clk),
-        .reset(rst | stall),  // stall the pipeline if hazard detected
+        .reset(rst),  
+	.stall(stall), 
         .alu_data(alu_data_out),
         .rs(rs),
         .rt(rt),
@@ -153,7 +162,6 @@ module datapath_pipeline();
     );
 
     // Forwarding Unit
-    wire [1:0] forwardA, forwardB;
     forwarding_unit fu(
         .rs_EX(rs_address),
         .rt_EX(rt_address),
@@ -173,17 +181,20 @@ module datapath_pipeline();
     reg [31:0] branch_address;
 
     always @* begin
-        // Forwarding logic for ALU inputs
+        // Forwarding logic for ALU inputs   (ALUSrc_EX) ? {SignExtend_EX[15], instruction_EX[14:0]} : rt_EX;  
+	//.MemRead_EX(MemtoReg_EX),
         case (forwardA)
-            2'b00: alu_inp_1 = rs_EX;
+            2'b00: alu_inp_1 = (MemtoReg_EX) ?data_out:rs_EX;
             2'b01: alu_inp_1 = ans_1;
             2'b10: alu_inp_1 = rd_final_data;
+	    2'b11: alu_inp_1 = data_out;
         endcase
 
         case (forwardB)
             2'b00: alu_inp_2 = (ALUSrc_EX) ? {SignExtend_EX[15], instruction_EX[14:0]} : rt_EX;
             2'b01: alu_inp_2 = ans_1;
             2'b10: alu_inp_2 = rd_final_data;
+	    2'b11: alu_inp_1 = data_out;
         endcase
 
         if (branch_EX == 1) begin
@@ -281,14 +292,11 @@ module datapath_pipeline();
     assign rd_final_data = MemtoReg_WB ? data_out_WB : ans_final;
 
     initial begin
-        rst = 1; clk = 1;
         tempPC = 0;
         PCSrc = 0;
         control = 0;
         #100;
-        rst = 0; 
         control = 1;
     end
 
-    always #50 clk = ~clk;
 endmodule

@@ -16,7 +16,8 @@ module datapath_pipeline();
     reg control;
 
     //==================>Control Signals for Registers<=========================
-    // IO for ID_EX_pipeline_reg 
+    // IO for 
+ 
     wire regDest_EX, jump_EX, branch_EX, MemRead_EX, MemtoReg_EX, MemWrite_EX, ALUSrc_EX, RegWrite_EX;
     wire [1:0] ALUOp_EX;
 
@@ -106,7 +107,21 @@ module datapath_pipeline();
         .clk(clk),
         .mem_write(RegWrite_WB)
     );
-
+reg branchAlways;
+reg [31:0] branch_address2;
+	always@(posedge clk) begin 
+		if (branch == 1) begin
+			branch_address2[14:0] = instruction[15:0];
+            		branch_address2 = branch_address2 << 2;
+            		branch_address2 = branch_address2 + pc;
+        	end else
+            		branch_address2 = 0;
+			
+		if((rs == rt)&&(branch == 1)) begin
+			branchAlways=1'b1;
+		end else
+			branchAlways=1'b0;
+	end
     // SignExtend Call
     wire [31:0] SignExtend;
     sign_extend se(instruction_ID[15:0], SignExtend);
@@ -175,7 +190,6 @@ module datapath_pipeline();
     end
 
     reg [31:0] alu_inp_2, alu_inp_1;
-    reg [31:0] branch_address;
 
     always @* begin
         // Forwarding logic for ALU inputs   (ALUSrc_EX) ? {SignExtend_EX[15], instruction_EX[14:0]} : rt_EX;  
@@ -193,13 +207,6 @@ module datapath_pipeline();
             2'b10: alu_inp_2 = rd_final_data;
 	    2'b11: alu_inp_1 = data_out;
         endcase
-
-        if (branch_EX == 1) begin
-            branch_address[14:0] = instruction_EX[15:0];
-            branch_address = branch_address << 2;
-            branch_address = branch_address + pc;
-        end else
-            branch_address = 0;
 
         jumpPC = 0;
         jumpPC = instruction[25:0];
@@ -253,7 +260,7 @@ module datapath_pipeline();
         tempPC = branch_address_1;
     end
     assign branchCheck = zero_MEM & branch_MEM;
-    assign pc = rst ? 32'b0 : (branchCheck) ? tempPC : pc_out;
+    assign pc = rst ? 32'b0 : (branchAlways) ? branch_address2 : pc_out;
 
     // Calling Data Memory
     data_mem DataMemCall(

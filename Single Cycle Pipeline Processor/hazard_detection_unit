@@ -1,0 +1,16 @@
+module hazard_detection_unit(
+    input [4:0] rs1_ID,
+    input [4:0] rs2_ID,
+    input [4:0] rt_EX,
+    input MemRead_EX,
+	input clk,
+    output reg stall
+);
+    always @(posedge clk) begin
+        if (MemRead_EX && ((rt_EX == rs1_ID) || (rt_EX == rs2_ID))) begin
+            stall = 1'b1;
+        end else begin
+            stall = 1'b0;
+        end
+    end
+endmodule

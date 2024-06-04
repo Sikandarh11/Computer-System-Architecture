@@ -1,13 +1,8 @@
-module datapath_pipeline(
-	input clk,
-	input rst,
-	output [31:0] pc,
-	output stall,
-	output [1:0] forwardA,
-	output [1:0] forwardB
-);
-    wire [31:0] pc_out;
+module datapath_pipeline();
+    reg clk;
+    wire [31:0] pc, pc_out;
     wire [31:0] instruction, instruction_ID, instruction_EX;
+    reg rst;
     wire zero;
     wire [31:0] rs, rt, rd, ans, rd_final_data;
     // temp var
@@ -42,6 +37,7 @@ module datapath_pipeline(
     //========================Before IF/ID Register====================================
 	wire [31:0] alu_data_out;
 // Hazard Detection Unit
+    wire stall;
     hazard_detection_unit hdu(
 	.clk(clk),
         .rs1_ID(instruction_ID[25:21]),
@@ -162,6 +158,7 @@ module datapath_pipeline(
     );
 
     // Forwarding Unit
+    wire [1:0] forwardA, forwardB;
     forwarding_unit fu(
         .rs_EX(rs_address),
         .rt_EX(rt_address),
@@ -184,15 +181,15 @@ module datapath_pipeline(
         // Forwarding logic for ALU inputs   (ALUSrc_EX) ? {SignExtend_EX[15], instruction_EX[14:0]} : rt_EX;  
 	//.MemRead_EX(MemtoReg_EX),
         case (forwardA)
-            2'b00: alu_inp_1 = (MemtoReg_EX) ?data_out:rs_EX;
-            2'b01: alu_inp_1 = ans_1;
+            2'b00: alu_inp_1 = rs_EX;
+            2'b01: alu_inp_1 = (MemRead_EX)?data_out: ans_1;
             2'b10: alu_inp_1 = rd_final_data;
 	    2'b11: alu_inp_1 = data_out;
         endcase
 
         case (forwardB)
             2'b00: alu_inp_2 = (ALUSrc_EX) ? {SignExtend_EX[15], instruction_EX[14:0]} : rt_EX;
-            2'b01: alu_inp_2 = ans_1;
+            2'b01: alu_inp_2 = (MemRead_EX)?data_out: ans_1;
             2'b10: alu_inp_2 = rd_final_data;
 	    2'b11: alu_inp_1 = data_out;
         endcase
@@ -253,7 +250,6 @@ module datapath_pipeline(
     reg PCSrc;
     always @(*) begin
         PCSrc = zero_MEM & branch_MEM;
-
         tempPC = branch_address_1;
     end
     assign branchCheck = zero_MEM & branch_MEM;
@@ -292,11 +288,14 @@ module datapath_pipeline(
     assign rd_final_data = MemtoReg_WB ? data_out_WB : ans_final;
 
     initial begin
+        rst = 1; clk = 1;
         tempPC = 0;
         PCSrc = 0;
         control = 0;
         #100;
+        rst = 0; 
         control = 1;
     end
 
+    always #50 clk = ~clk;
 endmodule

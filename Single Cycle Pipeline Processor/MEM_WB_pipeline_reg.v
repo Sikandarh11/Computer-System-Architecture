@@ -19,18 +19,18 @@ module MEM_WB_pipeline_reg (
     always @(posedge clk or posedge reset) begin
         if (reset) begin
             alu_data_out = 32'h0;
-            rd_out = 32'h0;
 	    data_out = 32'h0;
             rd_address_out = 5'b0; 
             RegWrite_out = 1'b0;
             MemtoReg_out = 1'b0;
+	    rd_out = 1'b0;
         end else begin
             alu_data_out <= alu_data;
-            rd_out <= rd;
 	    data_out <= data;
             rd_address_out <= rd_address;
             RegWrite_out <= RegWrite;
             MemtoReg_out <= MemtoReg;
+	    rd_out <= rd;
         end
     end
 

@@ -23,7 +23,7 @@ module alu_pipeline(
 		        6'b100010: temp = a-b;
 		        6'b100100: temp = a&b;
 		        6'b100101: temp = a|b;
-			6'b101010: if(a<b) temp = 1; else temp=0;
+			6'b100110: temp = a^b;
 		        default: temp = 0;
 		      endcase 
 			 zero=0;
